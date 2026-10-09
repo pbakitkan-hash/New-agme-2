@@ -3,346 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mini App Clicker & Cases</title>
+    <title>Brainrot Case</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1a1a1e;
+            --accent: #f3ba2f;
+            --text-color: #ffffff;
+            --secondary-text: #a1a1aa;
+        }
+        body {
             margin: 0;
             padding: 0;
-            user-select: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #12131C;
-            color: #FFFFFF;
             display: flex;
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            user-select: none;
         }
-
-        /* Шапка с профилем */
-        .header {
-            background: #1A1C29;
-            padding: 15px 20px;
+        header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .user-info {
-            display: flex;
             align-items: center;
-            gap: 12px;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid #27272a;
         }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; background: #52525b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .balance { background: #27272a; padding: 6px 12px; border-radius: 20px; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 5px; }
+        
+        .content { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; overflow-y: auto; }
+        .content.active { display: flex; }
 
-        .avatar {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #6B73FF, #000DFF);
+        .clicker-container { position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .tap-target {
+            width: 220px;
+            height: 220px;
+            background: linear-gradient(135deg, #f3ba2f, #d97706);
             border-radius: 50%;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .balance-card {
-            background: rgba(255, 215, 0, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            padding: 6px 14px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        /* Контент навигации */
-        .tab-content {
-            flex: 1;
-            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(243, 186, 47, 0.3);
+            transition: transform 0.1s ease;
         }
+        .tap-target:active { transform: scale(0.92); }
+        .tap-title { font-size: 14px; color: #451a03; font-weight: bold; margin-top: 5px; }
 
-        .tab-content.active {
-            display: flex;
-        }
+        .energy-bar-container { width: 80%; max-width: 300px; background: #27272a; height: 12px; border-radius: 6px; margin-top: 25px; overflow: hidden; }
+        .energy-bar { background: #22c55e; height: 100%; width: 100%; transition: width 0.3s; }
 
-        /* Кликер */
-        .clicker-container {
-            text-align: center;
-        }
+        .case-card { background: var(--card-bg); border: 1px solid #27272a; padding: 20px; border-radius: 16px; width: 100%; max-width: 320px; margin-bottom: 15px; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 12px 24px; font-weight: bold; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .btn:active { opacity: 0.8; }
 
-        .coin-btn {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #FFE066 0%, #F59E0B 100%);
-            border: 8px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 70px;
-            cursor: pointer;
-            transition: transform 0.05s ease;
-            margin: 30px auto;
-        }
+        .inventory-list { width: 100%; max-width: 350px; text-align: left; max-height: 50vh; overflow-y: auto; }
+        .inv-item { background: var(--card-bg); padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a; }
+        .sell-btn { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
-        .coin-btn:active {
-            transform: scale(0.93);
-        }
+        nav { display: flex; background: var(--card-bg); border-top: 1px solid #27272a; padding: 10px 0; }
+        .nav-item { flex: 1; text-align: center; color: var(--secondary-text); font-size: 12px; cursor: pointer; background: none; border: none; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item div { font-size: 20px; margin-bottom: 2px; }
 
-        .energy-bar-container {
-            width: 100%;
-            max-width: 250px;
-            background: rgba(255, 255, 255, 0.1);
-            height: 12px;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .energy-fill {
-            height: 100%;
-            background: #10B981;
-            width: 100%;
-            transition: width 0.2s ease;
-        }
-
-        /* Кейсы */
-        .case-card {
-            background: #1A1C29;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            width: 100%;
-            max-width: 300px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .case-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
-        }
-
-        .btn {
-            background: #3B82F6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+        .floating-text {
+            position: absolute;
+            color: #22c55e;
             font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
+            font-size: 24px;
+            animation: floatUp 0.8s ease-out forwards;
+            pointer-events: none;
         }
-
-        .btn:disabled {
-            background: #4B5563;
-            opacity: 0.6;
-        }
-
-        /* Инвентарь */
-        .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            width: 100%;
-            max-width: 320px;
-        }
-
-        .inventory-item {
-            background: #1A1C29;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        /* Нижнее меню */
-        .bottom-nav {
-            background: #1A1C29;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-item {
-            color: #9CA3AF;
-            text-decoration: none;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-
-        .nav-item.active {
-            color: #3B82F6;
-            font-weight: bold;
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Шапка профиля -->
-    <div class="header">
+    <header>
         <div class="user-info">
-            <div class="avatar" id="avatar">U</div>
+            <div class="avatar" id="user-initial">P</div>
             <div>
-                <div id="username" style="font-weight: bold; font-size: 14px;">Игрок</div>
-                <div style="font-size: 11px; color: #9CA3AF;">Фермер</div>
+                <div id="username" style="font-weight: bold; font-size: 14px;">parasat</div>
+                <div style="font-size: 11px; color: var(--secondary-text);">Фермер</div>
             </div>
         </div>
-        <div class="balance-card">
-            🪙 <span id="balance">0</span>
+        <div class="balance">🪙 <span id="balance-val">0</span></div>
+    </header>
+
+    <div id="tab-clicker" class="content active">
+        <h2>Тапай и фарми!</h2>
+        <div class="clicker-container" id="tap-zone">
+            <div class="tap-target">
+                <span style="font-size: 55px;">🍕🤖</span>
+                <div class="tap-title">Нубинни Пицанини</div>
+            </div>
         </div>
+        <div class="energy-bar-container">
+            <div class="energy-bar" id="energy-bar"></div>
+        </div>
+        <div style="margin-top: 10px; font-size: 13px; color: var(--secondary-text);">Энергия: <span id="energy-val">100</span>/100</div>
     </div>
 
-    <!-- Вкладка Кликер -->
-    <div id="clickerTab" class="tab-content active">
-        <div class="clicker-container">
-            <h2>Тапай и фарми!</h2>
-            <div class="coin-btn" onclick="clickCoin()">💰</div>
-            <div style="color: #9CA3AF; font-size: 14px;">
-                Энергия: <span id="energyText">100/100</span>
-            </div>
-            <div class="energy-bar-container">
-                <div class="energy-fill" id="energyFill"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Вкладка Кейсы -->
-    <div id="casesTab" class="tab-content">
+    <div id="tab-cases" class="content">
         <div class="case-card">
-            <div class="case-icon">📦</div>
             <h3>Обычный кейс</h3>
-            <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">Содержит случайные скины</p>
-            <button class="btn" onclick="openCase()" id="openCaseBtn">Открыть (50 🪙)</button>
-        </div>
-        <div id="dropResult" style="margin-top: 15px; font-size: 16px; font-weight: bold;"></div>
-    </div>
-
-    <!-- Вкладка Инвентарь -->
-    <div id="inventoryTab" class="tab-content">
-        <h3 style="margin-bottom: 15px;">Мои скины</h3>
-        <div class="inventory-grid" id="inventoryGrid">
-            <div style="grid-column: span 2; text-align: center; color: #9CA3AF;">Инвентарь пуст</div>
+            <p style="font-size: 13px; color: var(--secondary-text);">Содержит случайные скины</p>
+            <p id="case-result" style="min-height: 40px; margin: 10px 0; font-weight: bold; color: var(--accent);">Нажми открыть!</p>
+            <button class="btn" onclick="openCase()">Открыть (50 🪙)</button>
         </div>
     </div>
 
-    <!-- Нижнее меню -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('clickerTab', this)">
-            <span style="font-size: 18px;">⚡</span>
-            <span>Кликер</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('casesTab', this)">
-            <span style="font-size: 18px;">🎁</span>
-            <span>Кейсы</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('inventoryTab', this)">
-            <span style="font-size: 18px;">🎒</span>
-            <span>Инвентарь</span>
+    <div id="tab-inventory" class="content">
+        <h3>Твой инвентарь</h3>
+        <div class="inventory-list" id="inventory-container">
+            <p style="color: var(--secondary-text); text-align: center;">Инвентарь пуст</p>
         </div>
     </div>
+
+    <nav>
+        <button class="nav-item active" onclick="switchTab('clicker', this)">
+            <div>⚡</div>Кликер
+        </button>
+        <button class="nav-item" onclick="switchTab('cases', this)">
+            <div>🎁</div>Кейсы
+        </button>
+        <button class="nav-item" onclick="switchTab('inventory', this)">
+            <div>🎒</div>Инвентарь
+        </button>
+    </nav>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let coins = 0;
+        let balance = parseInt(localStorage.getItem('brainrot_balance')) || 100;
         let energy = 100;
-        const maxEnergy = 100;
-        let inventory = [];
+        let inventory = JSON.parse(localStorage.getItem('brainrot_inv')) || [];
 
-        // Инициализация профиля из Telegram
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            document.getElementById('username').innerText = user.first_name;
-            document.getElementById('avatar').innerText = user.first_name[0].toUpperCase();
-        }
-
-        // Кликер
-        function clickCoin() {
-            if (energy > 0) {
-                coins += 1;
-                energy -= 1;
-                updateUI();
-            }
-        }
-
-        // Восстановление энергии
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                updateUI();
-            }
-        }, 7000);
+        const balanceEl = document.getElementById('balance-val');
+        const energyEl = document.getElementById('energy-val');
+        const energyBar = document.getElementById('energy-bar');
 
         function updateUI() {
-            document.getElementById('balance').innerText = coins;
-            document.getElementById('energyText').innerText = `${energy}/${maxEnergy}`;
-            document.getElementById('energyFill').style.width = `${(energy / maxEnergy) * 100}%`;
-            document.getElementById('openCaseBtn').disabled = coins < 50;
-        }
-
-        // Переключение вкладок
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            balanceEl.innerText = balance;
+            energyEl.innerText = energy;
+            energyBar.style.width = energy + '%';
             
-            document.getElementById(tabId).classList.add('active');
-            el.classList.add('active');
+            localStorage.setItem('brainrot_balance', balance);
+            localStorage.setItem('brainrot_inv', JSON.stringify(inventory));
+            renderInventory();
         }
 
-        // Открытие кейсов
-        const drops = [
-            { name: "Обычный ножик", rarity: "⚪ Обычный", icon: "🔪" },
-            { name: "Золотой AK-47", rarity: "🟡 Легендарный", icon: "🔫" },
-            { name: "Неоновый шлем", rarity: "🟣 Редкий", icon: "🪖" },
-            { name: "Ржавый пистолет", rarity: "⚪ Обычный", icon: "🔫" }
+        const tapZone = document.getElementById('tap-zone');
+        tapZone.addEventListener('click', (e) => {
+            if (energy >= 1) {
+                balance += 1;
+                energy -= 1;
+                updateUI();
+
+                let rect = tapZone.getBoundingClientRect();
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                
+                let floatText = document.createElement('div');
+                floatText.className = 'floating-text';
+                floatText.innerText = '+1';
+                floatText.style.left = x + 'px';
+                floatText.style.top = y + 'px';
+                tapZone.appendChild(floatText);
+
+                setTimeout(() => floatText.remove(), 800);
+            }
+        });
+
+        setInterval(() => {
+            if (energy < 100) {
+                energy += 2;
+                if (energy > 100) energy = 100;
+                updateUI();
+            }
+        }, 1000);
+
+        const possibleDrops = [
+            { name: "🟢 Неоновый шлем (Редкий)", price: 30 },
+            { name: "🟡 Золотой АК-47 (Легендарный)", price: 100 },
+            { name: "🔵 Синий керамбит (Эпический)", price: 60 },
+            { name: "⚪ Ржавый болт (Обычный)", price: 10 }
         ];
 
         function openCase() {
-            if (coins >= 50) {
-                coins -= 50;
-                const randomDrop = drops[Math.floor(Math.random() * drops.length)];
-                inventory.push(randomDrop);
-                
-                document.getElementById('dropResult').innerText = `Выпало: ${randomDrop.icon} ${randomDrop.name} (${randomDrop.rarity})`;
-                renderInventory();
+            if (balance >= 50) {
+                balance -= 50;
+                let drop = possibleDrops[Math.floor(Math.random() * possibleDrops.length)];
+                inventory.push(drop);
                 updateUI();
+                document.getElementById('case-result').innerText = `Выпало: ${drop.name}`;
+            } else {
+                alert('Не хватает монеток!');
             }
         }
 
         function renderInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            if (inventory.length === 0) return;
+            const container = document.getElementById('inventory-container');
+            if (inventory.length === 0) {
+                container.innerHTML = '<p style="color: var(--secondary-text); text-align: center;">Инвентарь пуст</p>';
+                return;
+            }
+            container.innerHTML = '';
+            inventory.forEach((item, index) => {
+                let div = document.createElement('div');
+                div.className = 'inv-item';
+                div.innerHTML = `
+                    <span>${item.name}</span>
+                    <button class="sell-btn" onclick="sellItem(${index})">Продать (+${item.price} 🪙)</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function sellItem(index) {
+            let item = inventory[index];
+            balance += item.price;
+            inventory.splice(index, 1);
+            updateUI();
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             
-            grid.innerHTML = inventory.map(item => `
-                <div class="inventory-item">
-                    <div style="font-size: 30px;">${item.icon}</div>
-                    <div style="font-weight: bold; font-size: 13px; margin-top: 4px;">${item.name}</div>
-                    <div style="font-size: 10px; color: #9CA3AF;">${item.rarity}</div>
-                </div>
-            `).join('');
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btn.classList.add('active');
         }
 
         updateUI();
