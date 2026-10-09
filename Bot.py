@@ -4,8 +4,8 @@ import sys
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 
-# Вставь сюда свой токен от BotFather
-TOKEN = "ТВОЙ_ТОКЕН_БОТА"
+# Твой токен бота
+TOKEN = "8955476193:AAGcJOMP8FM0cPIbIyxQ4Zs0iLwDyfH-AgA"
 
 # Инициализируем бота и диспетчер
 bot = Bot(token=TOKEN)
@@ -23,7 +23,7 @@ async def cmd_start(message: types.Message):
 async def main():
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     
-    # Очищаем старые апдейты перед запуском (правильный вызов у бота, а не у диспетчера)
+    # Очищаем старые апдейты перед запуском
     await bot.delete_webhook(drop_pending_updates=True)
     
     print("=== БОТ УСПЕШНО ЗАПУЩЕН НА RENDER ===")
