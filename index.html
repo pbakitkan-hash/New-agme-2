@@ -23,15 +23,38 @@
         }
         .score-container {
             font-size: 28px;
-            margin: 15px 0;
+            margin: 10px 0;
             font-weight: bold;
             color: #0fff95;
+        }
+        /* Блок энергии */
+        .energy-container {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #ffde59;
+            font-weight: bold;
+        }
+        .energy-bar-bg {
+            width: 80%;
+            max-width: 250px;
+            height: 12px;
+            background: #16213e;
+            border-radius: 6px;
+            margin: 5px auto;
+            border: 2px solid #0f3460;
+            overflow: hidden;
+        }
+        .energy-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: #ffde59;
+            transition: width 0.3s ease;
         }
         /* Кликер с персонажем */
         .clicker-box {
             position: relative;
             display: inline-block;
-            margin: 20px 0;
+            margin: 10px 0;
             cursor: pointer;
             user-select: none;
         }
@@ -72,7 +95,7 @@
             background: #16213e;
             border-radius: 15px;
             padding: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: 2px solid #0f3460;
         }
         .btn {
@@ -88,142 +111,4 @@
             transition: background 0.2s;
         }
         .btn:hover {
-            background-color: #ff6b81;
-        }
-        /* Блок дропа внизу */
-        .drop-history {
-            margin-top: 25px;
-            background: #0f3460;
-            border-radius: 12px;
-            padding: 12px;
-            max-height: 180px;
-            overflow-y: auto;
-            text-align: left;
-        }
-        .drop-history h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #ffde59;
-            text-align: center;
-        }
-        .drop-item {
-            background: #1a1a2e;
-            padding: 8px 12px;
-            margin-bottom: 6px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            border-left: 5px solid #0fff95;
-        }
-        .skin-rare { color: #ffde59; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <!-- Сюда подставится имя игрока из Telegram -->
-    <h1 id="greeting">🧠 Brainrot Clicker</h1>
-    <p style="color: #aaa; margin: 0;">Стиль: Нубини Пицанини</p>
-
-    <div class="score-container">Монеты: <span id="score">0</span></div>
-
-    <!-- Кликер с персонажем -->
-    <div class="clicker-box" id="clickerArea">
-        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=60" alt="Нубини Пицанини" class="character-img" id="charImg">
-    </div>
-
-    <!-- Блок открытия кейсов со скинами -->
-    <div class="cases-section">
-        <h2>🎁 Кейс со скинами</h2>
-        <p style="font-size: 14px; color: #ccc;">Цена: 50 монет</p>
-        <button class="btn" onclick="openCase()">Открыть кейс</button>
-        <p id="caseResult" style="margin-top: 10px; font-weight: bold; color: #ffde59;"></p>
-    </div>
-
-    <!-- Нижний блок с наглядным отображением выпавшего дропа -->
-    <div class="drop-history">
-        <h3>📦 История твоего дропа</h3>
-        <div id="dropList">
-            <div style="color: #777; text-align: center; font-size: 13px;">Здесь будет появляться твой дроп со скинами</div>
-        </div>
-    </div>
-
-    <script>
-        // Инициализация Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // Получаем имя пользователя из Telegram, если оно есть
-        let userName = "Игрок";
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userName = tg.initDataUnsafe.user.first_name || tg.initDataUnsafe.user.username || "Игрок";
-        }
-
-        // Выводим персональное приветствие
-        document.getElementById("greeting").textContent = `🧠 Привет, ${userName}!`;
-
-        let score = 0;
-        const scoreDisplay = document.getElementById("score");
-        const clickerArea = document.getElementById("clickerArea");
-        const dropList = document.getElementById("dropList");
-        const caseResult = document.getElementById("caseResult");
-
-        // Список возможных скинов в кейсах
-        const skins = [
-            { name: "Нубини Пицанини Классик", chance: "Обычный" },
-            { name: "Золотой Скибиди", chance: "Редкий" },
-            { name: "Пьяный Чак Норрис", chance: "Эпический" },
-            { name: "Ультра Брейнрот Сигма", chance: "Легендарный" },
-            { name: "Пицца-Кот Нубини", chance: "Редкий" }
-        ];
-
-        // Клик по персонажу + анимация +1
-        clickerArea.addEventListener("click", function(event) {
-            score += 1;
-            scoreDisplay.textContent = score;
-
-            let plusOne = document.createElement("div");
-            plusOne.className = "floating-text";
-            plusOne.textContent = "+1";
-            
-            // Координаты появления текста рядом с кликом
-            plusOne.style.left = `${event.pageX - 15}px`;
-            plusOne.style.top = `${event.pageY - 25}px`;
-
-            document.body.appendChild(plusOne);
-
-            setTimeout(() => {
-                plusOne.remove();
-            }, 800);
-        });
-
-        // Функция открытия кейса
-        function openCase() {
-            if (score < 50) {
-                caseResult.textContent = "❌ Не хватает монет! (Нужно 50)";
-                return;
-            }
-
-            score -= 50;
-            scoreDisplay.textContent = score;
-
-            let randomSkin = skins[Math.floor(Math.random() * skins.length)];
-            
-            caseResult.innerHTML = `🎉 Выпало: <span class="skin-rare">${randomSkin.name}</span> [${randomSkin.chance}]`;
-
-            if (dropList.innerHTML.includes("Здесь будет появляться")) {
-                dropList.innerHTML = "";
-            }
-
-            let dropItemHTML = `
-                <div class="drop-item">
-                    <span>👕 <b>${randomSkin.name}</b></span>
-                    <span class="skin-rare">${randomSkin.chance}</span>
-                </div>
-            `;
-            dropList.innerHTML = dropItemHTML + dropList.innerHTML;
-        }
-    </script>
-</body>
-</html>
+            background-color: #ff6b
